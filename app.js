@@ -1,11 +1,4 @@
-// Carregar chave salva no navegador
-const apiKeyInput = document.getElementById('apiKey');
-apiKeyInput.value = localStorage.getItem('gemini_api_key') || '';
-
-document.getElementById('saveKeyBtn').addEventListener('click', () => {
-  localStorage.setItem('gemini_api_key', apiKeyInput.value.trim());
-  alert('Chave salva localmente neste navegador.');
-});
+const WORKER_URL = 'https://md-reports20.lgpsluizgabriel.workers.dev/';
 
 // Controle dos checkboxes de atestado (mutuamente exclusivos) e exibição da data de alta
 const checkInternacao = document.getElementById('gerarAtestadoInternacao');
@@ -70,15 +63,9 @@ ORIENTAÇÕES DE RETORNO OBRIGATÓRIAS PARA INCLUIR NO RELATÓRIO DE ALTA:
 `;
 }
 
-// Envio do formulário e chamada ao agente Gemini
+// Envio do formulário e chamada ao Cloudflare Worker
 document.getElementById('docForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-
-  const apiKey = apiKeyInput.value.trim();
-  if (!apiKey) {
-    alert('Por favor, insira sua Chave API do Google Gemini no topo da página.');
-    return;
-  }
 
   const tipoRelatorio = document.querySelector('input[name="tipoRelatorio"]:checked').value;
   const evolucao = document.getElementById('evolucao').value.trim();
@@ -90,7 +77,6 @@ document.getElementById('docForm').addEventListener('submit', async (e) => {
   btn.disabled = true;
   btn.textContent = 'Gerando documentos...';
 
-  // Montagem das instruções do agente
   let instrucoes = `
 VOCÊ É UM MÉDICO ASSISTENTE HOSPITALAR. GERE OS DOCUMENTOS SOLICITADOS COM BASE ESTRITA NA EVOLUÇÃO CLÍNICA FORNECIDA.
 REGRAS GERAIS OBRIGATÓRIAS:
@@ -129,13 +115,10 @@ TAREFA 2 - ATESTADO DE ALTA MÉDICA (SEPARADO POR UMA LINHA EM BRANCO COM O TÍT
   const promptFinal = `${instrucoes}\n\nEVOLUÇÃO CLÍNICA FORNECIDA:\n${evolucao}`;
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: promptFinal }] }],
-        generationConfig: { temperature: 0.2 }
-      })
+      body: JSON.stringify({ prompt: promptFinal })
     });
 
     const data = await response.json();
