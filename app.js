@@ -1,6 +1,5 @@
 const WORKER_URL = 'https://md-reports20.lgpsluizgabriel.workers.dev/';
 
-// Controle dos checkboxes de atestado e exibição da data de alta
 const checkInternacao = document.getElementById('gerarAtestadoInternacao');
 const checkAlta = document.getElementById('gerarAtestadoAlta');
 const campoDataAlta = document.getElementById('campoDataAlta');
@@ -21,14 +20,12 @@ checkAlta.addEventListener('change', () => {
   }
 });
 
-// Formatar data YYYY-MM-DD para DD/MM/AAAA
 function formatarDataBR(dataStr) {
   if (!dataStr) return '';
   const [ano, mes, dia] = dataStr.split('-');
   return `${dia}/${mes}/${ano}`;
 }
 
-// Regras de retorno de ambulatório e curativos na alta
 function calcularRetornosAlta(dataAltaStr) {
   if (!dataAltaStr) return '';
   const [ano, mes, dia] = dataAltaStr.split('-').map(Number);
@@ -73,8 +70,17 @@ document.getElementById('docForm').addEventListener('submit', async (e) => {
   const pedirAtestadoAlta = checkAlta.checked;
 
   const btn = document.getElementById('gerarBtn');
+  const campoRelatorio = document.getElementById('textoRelatorioGerado');
+  const campoAtestado = document.getElementById('textoAtestadoGerado');
+
   btn.disabled = true;
-  btn.textContent = 'Gerando documentos...';
+  btn.textContent = 'Processando... Aguarde...';
+  campoRelatorio.value = 'GERANDO RELATÓRIO MÉDICO, AGUARDE...';
+  campoAtestado.value = (pedirAtestadoInternacao || pedirAtestadoAlta)
+    ? 'GERANDO ATESTADO MÉDICO, AGUARDE...'
+    : 'NENHUM ATESTADO MARCAD0 NO ITEM 2.';
+
+  document.getElementById('secaoRelatorio').scrollIntoView({ behavior: 'smooth' });
 
   let instrucoes = `
 VOCÊ É UM MÉDICO ASSISTENTE HOSPITALAR DO HUGOL. GERE OS DOCUMENTOS SOLICITADOS COM BASE ESTRITA NA EVOLUÇÃO CLÍNICA FORNECIDA.
@@ -82,7 +88,7 @@ REGRAS OBRIGATÓRIAS:
 1. TODO O TEXTO DEVE SER EM LETRAS MAIÚSCULAS (CAIXA ALTA).
 2. REDIJA EM TEXTO CORRIDO (PARÁGRAFO ÚNICO OU PARÁGRAFOS CONTÍNUOS), SEM TÓPICOS, SEM MARCADORES E SEM ASTERISCOS.
 3. NÃO INCLUA NOTAS EXPLICATIVAS OU CÁLCULOS DE DATAS.
-4. USE EXATAMENTE OS MARCADORES ===RELATORIO=== E ===ATESTADO=== PARA SEPARAR OS DOIS DOCUMENTOS NA RESPOSTA.
+4. USE EXATAMENTE OS MARCADORES ===RELATORIO=== E ===ATESTADO=== PARA SEPARAR OS DOIS DOCUMENTOS.
 `;
 
   if (tipoRelatorio === 'trabalhista') {
@@ -125,48 +131,39 @@ GERE O ATESTADO DE ALTA MÉDICA EM TEXTO CORRIDO:
       body: JSON.stringify({ prompt: promptFinal })
     });
 
-    const data = await response.json();
-    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+    const rawText = await response.text();
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      throw new Error('Resposta inválida do Cloudflare Worker: ' + rawText);
+    }
+
+    if (data.error) {
+      throw new Error(data.error.message || JSON.stringify(data.error));
+    }
+
     if (!data.candidates || !data.candidates[0]) {
-      throw new Error('Resposta inesperada do servidor: ' + JSON.stringify(data));
+      throw new Error('O Google Gemini não retornou texto. Detalhes: ' + JSON.stringify(data));
     }
 
     const textoCompleto = data.candidates[0].content.parts[0].text.toUpperCase();
-
-    // Separa Relatório e Atestado usando o marcador ===ATESTADO===
     const partes = textoCompleto.split('===ATESTADO===');
     const textoRelatorio = partes[0].replace('===RELATORIO===', '').trim();
     const textoAtestado = partes[1] ? partes[1].trim() : '';
 
-    // Exibe a caixa do Relatório
-    const secaoRelatorio = document.getElementById('secaoRelatorio');
-    document.getElementById('tituloRelatorioGerado').textContent =
-      tipoRelatorio === 'trabalhista' ? 'Relatório Médico (Fins Trabalhistas / INSS)' : 'Relatório de Alta Médico-Hospitalar';
-    document.getElementById('textoRelatorioGerado').value = textoRelatorio;
-    secaoRelatorio.style.display = 'block';
-
-    // Exibe a caixa do Atestado (se foi marcado)
-    const secaoAtestado = document.getElementById('secaoAtestado');
+    campoRelatorio.value = textoRelatorio;
     if (pedirAtestadoInternacao || pedirAtestadoAlta) {
-      document.getElementById('tituloAtestadoGerado').textContent =
-        pedirAtestadoInternacao ? 'Atestado de Internação Hospitalar' : 'Atestado de Alta Médica';
-      document.getElementById('textoAtestadoGerado').value = textoAtestado || 'NÃO FOI POSSÍVEL GERAR O ATESTADO. TENTE NOVAMENTE.';
-      secaoAtestado.style.display = 'block';
-    } else {
-      secaoAtestado.style.display = 'none';
+      campoAtestado.value = textoAtestado || 'NÃO FOI POSSÍVEL GERAR O ATESTADO. TENTE NOVAMENTE.';
     }
-
-    // Rola a página suavemente até o resultado
-    secaoRelatorio.scrollIntoView({ behavior: 'smooth' });
   } catch (err) {
-    alert('Erro ao gerar documento: ' + err.message);
+    campoRelatorio.value = 'ERRO AO GERAR DOCUMENTO:\n' + err.message + '\n\nVERIFIQUE SE A VARIÁVEL GEMINI_API_KEY FOI SALVA COMO SECRET NO CLOUDFLARE WORKER E SE FOI FEITO O DEPLOY.';
   } finally {
     btn.disabled = false;
     btn.textContent = 'Gerar Documentos';
   }
 });
 
-// Botões de Copiar individuais
 document.getElementById('copiarRelatorioBtn').addEventListener('click', () => {
   const texto = document.getElementById('textoRelatorioGerado');
   texto.select();
