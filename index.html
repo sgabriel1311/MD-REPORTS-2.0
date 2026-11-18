@@ -60,28 +60,30 @@
       <!-- Campo da Evolução -->
       <fieldset class="card">
         <legend>3. Evolução Clínica do Paciente</legend>
-        <textarea id="evolucao" rows="10" placeholder="Cole aqui a evolução médica completa do prontuário (dados do paciente, história, lesões/diagnósticos, cirurgias, exames, condutas)..." required></textarea>
+        <textarea id="evolucao" rows="10" placeholder="Cole aqui a evolução médica completa do prontuário..." required></textarea>
       </fieldset>
 
       <button type="submit" id="gerarBtn" class="btn-primary">Gerar Documentos</button>
     </form>
 
-    <!-- Área de Resultado 1: Relatório Médico -->
-    <section id="secaoRelatorio" class="card result-box" style="display: none;">
+    <hr style="margin: 28px 0; border: 0; border-top: 2px solid #cbd5e1;">
+
+    <!-- Campo 1: Relatório Médico (Sempre visível abaixo do botão) -->
+    <section id="secaoRelatorio" class="card result-box">
       <div class="result-header">
-        <h2 id="tituloRelatorioGerado">Relatório Médico</h2>
+        <h2 id="tituloRelatorioGerado">4. Relatório Médico Gerado</h2>
         <button type="button" id="copiarRelatorioBtn" class="btn-secondary">Copiar Relatório</button>
       </div>
-      <textarea id="textoRelatorioGerado" rows="12"></textarea>
+      <textarea id="textoRelatorioGerado" rows="12" placeholder="O relatório médico aparecerá aqui após clicar em Gerar Documentos..."></textarea>
     </section>
 
-    <!-- Área de Resultado 2: Atestado Médico -->
-    <section id="secaoAtestado" class="card result-box" style="display: none;">
+    <!-- Campo 2: Atestado Médico (Sempre visível abaixo do relatório) -->
+    <section id="secaoAtestado" class="card result-box">
       <div class="result-header">
-        <h2 id="tituloAtestadoGerado">Atestado Médico</h2>
+        <h2 id="tituloAtestadoGerado">5. Atestado Médico Gerado</h2>
         <button type="button" id="copiarAtestadoBtn" class="btn-secondary">Copiar Atestado</button>
       </div>
-      <textarea id="textoAtestadoGerado" rows="7"></textarea>
+      <textarea id="textoAtestadoGerado" rows="6" placeholder="O atestado médico aparecerá aqui se você marcar uma das opções no item 2..."></textarea>
     </section>
   </div>
 
