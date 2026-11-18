@@ -66,13 +66,22 @@
       <button type="submit" id="gerarBtn" class="btn-primary">Gerar Documentos</button>
     </form>
 
-    <!-- Área de Resultado -->
-    <section id="resultadoSection" class="card result-box" style="display: none;">
+    <!-- Área de Resultado 1: Relatório Médico -->
+    <section id="secaoRelatorio" class="card result-box" style="display: none;">
       <div class="result-header">
-        <h2>Documento(s) Gerado(s)</h2>
-        <button type="button" id="copiarBtn" class="btn-secondary">Copiar Texto</button>
+        <h2 id="tituloRelatorioGerado">Relatório Médico</h2>
+        <button type="button" id="copiarRelatorioBtn" class="btn-secondary">Copiar Relatório</button>
       </div>
-      <textarea id="resultadoTexto" rows="14" readonly></textarea>
+      <textarea id="textoRelatorioGerado" rows="12"></textarea>
+    </section>
+
+    <!-- Área de Resultado 2: Atestado Médico -->
+    <section id="secaoAtestado" class="card result-box" style="display: none;">
+      <div class="result-header">
+        <h2 id="tituloAtestadoGerado">Atestado Médico</h2>
+        <button type="button" id="copiarAtestadoBtn" class="btn-secondary">Copiar Atestado</button>
+      </div>
+      <textarea id="textoAtestadoGerado" rows="7"></textarea>
     </section>
   </div>
 
