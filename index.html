@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Relatórios e Atestados Médicos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Gerador de Documentos Médicos</h1>
+      <p>Geração automatizada baseada na evolução clínica</p>
+    </header>
+
+    <!-- Configuração da Chave de API (Salva apenas localmente no navegador) -->
+    <section class="api-box">
+      <label for="apiKey">Chave API (Google Gemini):</label>
+      <div class="api-row">
+        <input type="password" id="apiKey" placeholder="Cole sua API Key aqui (fica salva apenas neste navegador)">
+        <button type="button" id="saveKeyBtn">Salvar Chave</button>
+      </div>
+    </section>
+
+    <form id="docForm">
+      <!-- Seleção do Tipo de Relatório -->
+      <fieldset class="card">
+        <legend>1. Tipo de Relatório Médico</legend>
+        <div class="radio-group">
+          <label class="option-card">
+            <input type="radio" name="tipoRelatorio" value="trabalhista" checked>
+            <span><strong>Relatório de Internação (Fins Trabalhistas / INSS)</strong><br>
+            <small>Foco em quadro clínico atual, limitações, procedimentos e sem previsão de alta.</small></span>
+          </label>
+          <label class="option-card">
+            <input type="radio" name="tipoRelatorio" value="alta">
+            <span><strong>Relatório de Alta Médico-Hospitalar</strong><br>
+            <small>Resumo da internação, condutas realizadas, orientações de retorno e cuidados.</small></span>
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- Opções de Atestado -->
+      <fieldset class="card">
+        <legend>2. Atestado Médico (Opcional - Marque se desejar gerar junto)</legend>
+        <div class="checkbox-group">
+          <label>
+            <input type="checkbox" id="gerarAtestadoInternacao" name="atestado" value="internacao">
+            Gerar <strong>Atestado de Internação</strong> (paciente permanece internado)
+          </label>
+          <label>
+            <input type="checkbox" id="gerarAtestadoAlta" name="atestado" value="alta">
+            Gerar <strong>Atestado de Alta Médica</strong> (com período total de internação)
+          </label>
+        </div>
+
+        <div class="dates-grid" id="datasContainer">
+          <div>
+            <label for="dataAdmissao">Data de Admissão:</label>
+            <input type="date" id="dataAdmissao">
+          </div>
+          <div id="campoDataAlta" style="display: none;">
+            <label for="dataAlta">Data da Alta:</label>
+            <input type="date" id="dataAlta">
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Campo da Evolução -->
+      <fieldset class="card">
+        <legend>3. Evolução Clínica do Paciente</legend>
+        <textarea id="evolucao" rows="10" placeholder="Cole aqui a evolução médica completa do prontuário (dados do paciente, história, lesões/diagnósticos, cirurgias, exames, condutas)..." required></textarea>
+      </fieldset>
+
+      <button type="submit" id="gerarBtn" class="btn-primary">Gerar Documentos</button>
+    </form>
+
+    <!-- Área de Resultado -->
+    <section id="resultadoSection" class="card result-box" style="display: none;">
+      <div class="result-header">
+        <h2>Documento(s) Gerado(s)</h2>
+        <button type="button" id="copiarBtn" class="btn-secondary">Copiar Texto</button>
+      </div>
+      <textarea id="resultadoTexto" rows="14" readonly></textarea>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
